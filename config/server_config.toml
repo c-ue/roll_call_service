@@ -1,0 +1,38 @@
+# Server Configuration
+
+[SERVER]
+IP = "127.0.0.1"
+PORT = "4040"
+DEBUG = true
+
+[[MEMBERS]]
+NAME = "qi"
+GROUP = 1
+PRIVILEGE = 0
+
+[[MEMBERS]]
+NAME = "ju"
+GROUP = 1
+PRIVILEGE = 1
+
+
+[[EVENTS]]
+NAME = "休假"
+TIME = []
+
+[[EVENTS]]
+NAME = "公勤"
+TIME = []
+
+[[EVENTS]]
+NAME = "任管"
+TIME = []
+
+[[EVENTS]]
+NAME = "補休"
+TIME = []
+
+[[EVENTS]]
+NAME = "餐差"
+TIME = [6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18]
+

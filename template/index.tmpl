@@ -1,0 +1,120 @@
+<html lang="zh">
+<head>
+    <title>角落小生物生態系統</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="refresh" content="5">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="shortcut icon"
+          href="https://toppng.com/uploads/preview/hone-call-contact-dial-communication-svg-png-contact-and-message-ico-11562987828bgjxqwuk8j.png"
+          type="image/x-icon"/>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
+</head>
+
+<table class="table">
+    <thead class="thead-dark">
+    <tr>
+        <th scope="col" colspan="2">
+            <h1>類別</h1>
+        </th>
+        <th scope="col">
+            <h1>總計</h1>
+        </th>
+        <th scope="col" colspan="2">
+            <h1>今天</h1>
+        </th>
+        <th scope="col">
+            <h1>總計</h1>
+        </th>
+        <th scope="col" colspan="2">
+            <h1>明天</h1>
+        </th>
+        <th scope="col">
+            <h1>總計</h1>
+        </th>
+        <th scope="col" colspan="2">
+            <h1>後天</h1>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    {{range .RowEvents}}
+        <tr>
+            <th scope="row" colspan="2">
+                <h1>{{ .EventName }}</h1>
+            </th>
+            <td>
+                <h1>{{ .PeopleTdNum }}員</h1>
+            </td>
+            <td colspan="2">
+                {{range .PeopleTdList}}<h1>{{ . }}<br></h1>{{end}}
+            </td>
+            <td class="table-active">
+                <h1>{{ .PeopleTmNum }}員</h1>
+            </td>
+            <td colspan="2" class="table-active">
+                {{range .PeopleTmList}}<h1>{{ . }}<br></h1>{{end}}
+            </td>
+            <td>
+                <h1>{{ .PeopleAtmNum }}員</h1>
+            </td>
+            <td colspan="2">
+                {{range .PeopleAtmList}}<h1>{{ . }}<br></h1>{{end}}
+            </td>
+        </tr>
+    {{end}}
+    <tr class="table-dark">
+        <th scope="row" colspan="2">
+            <h1>人數</h1>
+        </th>
+        <td colspan="3">
+            <h1></h1>
+        </td>
+        <td colspan="3">
+            <h1></h1>
+        </td>
+        <td colspan="3">
+            <h1></h1>
+        </td>
+    </tr>
+    <tr>
+        <th scope="row" colspan="2">
+            <h1>應到</h1>
+        </th>
+        <td colspan="3">
+            <h1>{{ .PeopleTdTotal }}員</h1>
+        </td>
+        <td colspan="3" class="table-active">
+            <h1>{{ .PeopleTmTotal }}員</h1>
+        </td>
+        <td colspan="3">
+            <h1>{{ .PeopleAtmTotal }}員</h1>
+        </td>
+    </tr>
+    <tr>
+        <th scope="row" colspan="2">
+            <h1>實到</h1>
+        </th>
+        <td colspan="3">
+            <h1>{{ .PeopleTdRemain }}員</h1>
+        </td>
+        <td colspan="3" class="table-active">
+            <h1>{{ .PeopleTmRemain }}員</h1>
+        </td>
+        <td colspan="3">
+            <h1>{{ .PeopleAtmRemain }}員</h1>
+        </td>
+    </tr>
+
+    </tbody>
+</table>
+
+</html>
