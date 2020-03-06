@@ -4,12 +4,13 @@ import (
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 	"html/template"
+	"roll_call_service/server/config"
 	"roll_call_service/server/logger"
 	"runtime"
 	"strconv"
 )
 
-func Error(ctx *fasthttp.RequestCtx) {
+func Error(ctx *fasthttp.RequestCtx, serverConf config.Config) {
 	var ConnID = strconv.FormatUint(ctx.ConnID(), 10)
 	var log *zap.Logger = logger.Console()
 
@@ -28,12 +29,8 @@ func Error(ctx *fasthttp.RequestCtx) {
 	// -------------------------------------------------------
 	// 处理逻辑开始
 	// -------------------------------------------------------
-	templateFileName := "template/Error.html"
-	t, err := template.New("Error.html").ParseFiles(templateFileName)
-	if err != nil {
-		log.Debug("---------------- Template File Not Found [" + templateFileName + "]-------------")
-		return
-	}
+	templateFileName := "template/Error.tmpl"
+	t := template.Must(template.ParseFiles(templateFileName))
 	if err := t.Execute(ctx, string(ConnID)); err != nil {
 		_, file, _, _ := runtime.Caller(1)
 		log.Debug("---------------- Template Produce Error [" + file + ";" + err.Error() + "]-------------")

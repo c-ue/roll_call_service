@@ -3,19 +3,21 @@ package main
 import (
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
+	"roll_call_service/server/config"
 	"roll_call_service/server/logger"
 	"roll_call_service/server/pageHandle"
 )
 
 func main() {
 	var log *zap.Logger = logger.Console()
-	var server_address = ADDRESS + ":" + PORT
+	var conf config.Config = config.ReadConfig("server_config.toml")
+	var server_address = conf.SERVER.IP + ":" + conf.SERVER.PORT
 
 	// -------------------------------------------------------
 	//  fasthttp 的 handler 处理函数
 	// -------------------------------------------------------
 	var requestHandler = func(ctx *fasthttp.RequestCtx) {
-		if DEBUG {
+		if conf.SERVER.DEBUG {
 			debugRequestHandle(ctx)
 		}
 
@@ -26,14 +28,14 @@ func main() {
 		// 如果访问的 URI 路由是 /uri 开头 , 则进行下面这个响应
 		case uriPath == "/index.html":
 			{
-				pageHandle.Index(ctx)
+				pageHandle.Index(ctx, conf)
 				return
 			}
 
 			// 访问路踊不是 /uri 的其他响应
 		default:
 			{
-				pageHandle.Error(ctx)
+				pageHandle.Error(ctx, conf)
 				return
 			}
 		}

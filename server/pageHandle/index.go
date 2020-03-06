@@ -4,51 +4,56 @@ import (
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 	"html/template"
+	"roll_call_service/server/config"
 	"roll_call_service/server/logger"
 	"runtime"
 	"strconv"
 	"time"
 )
 
-type THREE_DATYS_DATA struct {
-	today              DAY_DATA
-	tomorrow           DAY_DATA
-	day_after_tomorrow DAY_DATA
-}
+type (
+	TABLE_DATA struct {
+		RowEvents       []TABLE_EVENT
+		PeopleTdTotal   int
+		PeopleTmTotal   int
+		PeopleAtmTotal  int
+		PeopleTdRemain  int
+		PeopleTmRemain  int
+		PeopleAtmRemain int
+	}
+	TABLE_EVENT struct {
+		EventName     string
+		PeopleTdNum   int
+		PeopleTdList  []string
+		PeopleTmNum   int
+		PeopleTmList  []string
+		PeopleAtmNum  int
+		PeopleAtmList []string
+	}
+)
 
-type DAY_DATA struct {
-	all_people    int
-	events        []EVENT_DATA
-	remain_people int
-}
+//TODO:rewrite for collcate all member obj
+type (
+	THREE_DATYS_DATA struct {
+		today              DAY_DATA
+		tomorrow           DAY_DATA
+		day_after_tomorrow DAY_DATA
+	}
 
-type EVENT_DATA struct {
-	event_name  string
-	people_num  int
-	people_list []string
-}
+	DAY_DATA struct {
+		all_people    int
+		events        []EVENT_DATA
+		remain_people int
+	}
 
-type TABLE_EVENT struct {
-	event_name      string
-	people_td_num   int
-	people_td_list  []string
-	people_tm_num   int
-	people_tm_list  []string
-	people_atm_num  int
-	people_atm_list []string
-}
+	EVENT_DATA struct {
+		event_name  string
+		people_num  int
+		people_list []string
+	}
+)
 
-type TABLE_DATA struct {
-	row_events        []TABLE_EVENT
-	people_td_total   int
-	people_tm_total   int
-	people_atm_total  int
-	people_td_remain  int
-	people_tm_remain  int
-	people_atm_remain int
-}
-
-func Index(ctx *fasthttp.RequestCtx) {
+func Index(ctx *fasthttp.RequestCtx, serverConf config.Config) {
 	var ConnID = strconv.FormatUint(ctx.ConnID(), 10)
 	var log *zap.Logger = logger.Console()
 
@@ -64,12 +69,8 @@ func Index(ctx *fasthttp.RequestCtx) {
 	// -------------------------------------------------------
 	// 处理逻辑开始
 	// -------------------------------------------------------
-	templateFileName := "template/index.html"
-	t, err := template.New("index.html").ParseFiles(templateFileName)
-	if err != nil {
-		log.Debug("---------------- Template File Not Found [" + templateFileName + "]-------------")
-		return
-	}
+	templateFileName := "template/index.tmpl"
+	t := template.Must(template.ParseFiles(templateFileName))
 
 	//debug data
 	//類別 	總計 今天 總計 明天 總計 後天
@@ -98,39 +99,63 @@ func Index(ctx *fasthttp.RequestCtx) {
 	}
 }
 
+//TODO:rewrite for collcate all member obj
 func ThreeDaysDateToTableData(s THREE_DATYS_DATA) TABLE_DATA {
 	var table_data TABLE_DATA
-	table_data.people_td_total = s.today.all_people
-	table_data.people_td_remain = s.today.remain_people
-	table_data.people_atm_total = s.day_after_tomorrow.all_people
-	table_data.people_atm_remain = s.day_after_tomorrow.remain_people
-	table_data.people_tm_total = s.tomorrow.all_people
-	table_data.people_tm_remain = s.tomorrow.remain_people
+	table_data.PeopleTdTotal = s.today.all_people
+	table_data.PeopleTdRemain = s.today.remain_people
+	table_data.PeopleAtmTotal = s.day_after_tomorrow.all_people
+	table_data.PeopleAtmRemain = s.day_after_tomorrow.remain_people
+	table_data.PeopleTmTotal = s.tomorrow.all_people
+	table_data.PeopleTmRemain = s.tomorrow.remain_people
 	for i := 0; i < len(s.today.events); i++ {
 		var row_event TABLE_EVENT
-		row_event.event_name = s.today.events[i].event_name
-		row_event.people_td_num = s.today.events[i].people_num
-		row_event.people_td_list = s.today.events[i].people_list
+		row_event.EventName = s.today.events[i].event_name
+		row_event.PeopleTdNum = s.today.events[i].people_num
+		row_event.PeopleTdList = s.today.events[i].people_list
 		for j := 0; j < len(s.tomorrow.events); j++ {
-			if s.tomorrow.events[j].event_name == row_event.event_name {
-				row_event.people_tm_list = s.tomorrow.events[j].people_list
-				row_event.people_tm_num = s.tomorrow.events[j].people_num
+			if s.tomorrow.events[j].event_name == row_event.EventName {
+				row_event.PeopleTmList = s.tomorrow.events[j].people_list
+				row_event.PeopleTmNum = s.tomorrow.events[j].people_num
 				s.tomorrow.events = append(s.tomorrow.events[:j], s.tomorrow.events[j+1:]...)
 			}
 		}
 		for k := 0; k < len(s.day_after_tomorrow.events); k++ {
-			if s.day_after_tomorrow.events[k].event_name == row_event.event_name {
-				row_event.people_atm_list = s.day_after_tomorrow.events[k].people_list
-				row_event.people_atm_num = s.day_after_tomorrow.events[k].people_num
+			if s.day_after_tomorrow.events[k].event_name == row_event.EventName {
+				row_event.PeopleAtmList = s.day_after_tomorrow.events[k].people_list
+				row_event.PeopleAtmNum = s.day_after_tomorrow.events[k].people_num
 				s.day_after_tomorrow.events = append(s.day_after_tomorrow.events[:k], s.day_after_tomorrow.events[k+1:]...)
 			}
 		}
-		table_data.row_events = append(table_data.row_events, row_event)
+		table_data.RowEvents = append(table_data.RowEvents, row_event)
+	}
+	for i := 0; i < len(s.tomorrow.events); i++ {
+		var row_event TABLE_EVENT
+		row_event.EventName = s.tomorrow.events[i].event_name
+		row_event.PeopleTmNum = s.tomorrow.events[i].people_num
+		row_event.PeopleTmList = s.tomorrow.events[i].people_list
+		for k := 0; k < len(s.day_after_tomorrow.events); k++ {
+			if s.day_after_tomorrow.events[k].event_name == row_event.EventName {
+				row_event.PeopleAtmList = s.day_after_tomorrow.events[k].people_list
+				row_event.PeopleAtmNum = s.day_after_tomorrow.events[k].people_num
+				s.day_after_tomorrow.events = append(s.day_after_tomorrow.events[:k], s.day_after_tomorrow.events[k+1:]...)
+			}
+		}
+		table_data.RowEvents = append(table_data.RowEvents, row_event)
+	}
+	for i := 0; i < len(s.day_after_tomorrow.events); i++ {
+		var row_event TABLE_EVENT
+		row_event.EventName = s.day_after_tomorrow.events[i].event_name
+		row_event.PeopleAtmNum = s.day_after_tomorrow.events[i].people_num
+		row_event.PeopleAtmList = s.day_after_tomorrow.events[i].people_list
+		table_data.RowEvents = append(table_data.RowEvents, row_event)
 	}
 	return table_data
 }
 
-//unit test
+//TODO:
+// rewrite in member obj
+// unit test
 func renew(date time.Time) DAY_DATA {
 	var event1 EVENT_DATA
 	event1.event_name = "任管"
