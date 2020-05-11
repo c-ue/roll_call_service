@@ -14,9 +14,10 @@ type (
 	}
 
 	MEMBER struct {
-		NAME      string
-		GROUP     int
-		PRIVILEGE int
+		NAME       string
+		CalendarId string
+		GROUP      int
+		PRIVILEGE  int
 	}
 
 	EVENT struct {

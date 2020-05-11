@@ -10,7 +10,7 @@ import (
 
 func main() {
 	var log *zap.Logger = logger.Console()
-	var conf config.Config = config.ReadConfig("server_config.toml")
+	var conf config.Config = config.ReadConfig("config/server_config.toml")
 	var server_address = conf.SERVER.IP + ":" + conf.SERVER.PORT
 
 	// -------------------------------------------------------
@@ -28,14 +28,14 @@ func main() {
 		// 如果访问的 URI 路由是 /uri 开头 , 则进行下面这个响应
 		case uriPath == "/index.html":
 			{
-				pageHandle.Index(ctx, conf)
+				pageHandle.Index(ctx, conf, log)
 				return
 			}
 
 			// 访问路踊不是 /uri 的其他响应
 		default:
 			{
-				pageHandle.Error(ctx, conf)
+				pageHandle.Error(ctx, conf, log)
 				return
 			}
 		}

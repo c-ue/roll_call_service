@@ -5,20 +5,18 @@ import (
 	"go.uber.org/zap"
 	"html/template"
 	"roll_call_service/server/config"
-	"roll_call_service/server/logger"
 	"runtime"
 	"strconv"
 )
 
-func Error(ctx *fasthttp.RequestCtx, serverConf config.Config) {
+func Error(ctx *fasthttp.RequestCtx, serverConf config.Config, log *zap.Logger) {
 	var ConnID = strconv.FormatUint(ctx.ConnID(), 10)
-	var log *zap.Logger = logger.Console()
 
 	// -------------------------------------------------------
 	// 处理 HTTP 响应数据
 	// -------------------------------------------------------
 	// HTTP header 构造
-	ctx.Response.Header.SetStatusCode(200)
+	ctx.Response.Header.SetStatusCode(404)
 	ctx.Response.Header.SetConnectionClose() // 关闭本次连接, 这就是短连接 HTTP
 	ctx.Response.Header.SetBytesKV([]byte("Content-Type"), []byte("text/html; charset=utf8"))
 	ctx.Response.Header.SetBytesKV([]byte("TransactionID"), []byte(ConnID))

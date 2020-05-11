@@ -12,12 +12,15 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"roll_call_service/server/logger"
+	"roll_call_service/server/member/DataStruct"
 	"time"
 )
 
-func GetSpecifyDaily(calendarId string) {
-	var log *zap.Logger = logger.Console()
+func GetSpecifyDay(calendarId string, date time.Time, log *zap.Logger) []DataStruct.EVENT {
+	//TODO: pop it out to member
+	log.Debug("---------------- GOOGLE CALENDAR api -------------")
+	log.Debug("Get Calendar Id: " + calendarId)
+	loc, _ := time.LoadLocation("Asia/Taipei")
 	b, err := ioutil.ReadFile("config/calendar_account_credentials.json")
 	if err != nil {
 		log.Fatal("Unable to read client secret file")
@@ -34,25 +37,52 @@ func GetSpecifyDaily(calendarId string) {
 	if err != nil {
 		log.Fatal("Unable to retrieve Calendar client")
 	}
-	//TODO:fix request time bound
-	t := time.Now().Format(time.RFC3339)
+	date = date.In(loc)
+	specDate := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, loc)
 	events, err := srv.Events.List(calendarId).ShowDeleted(false).
-		SingleEvents(true).TimeMin(t).MaxResults(10).OrderBy("startTime").Do()
+		SingleEvents(true).TimeMin(specDate.Format(time.RFC3339)).TimeMax(specDate.AddDate(0, 0, 1).
+		Format(time.RFC3339)).OrderBy("startTime").Do()
 	if err != nil {
-		log.Fatalf("Unable to retrieve next ten of the user's events: %v", err)
+		log.Fatal("Unable to retrieve the calendarId's events: " + err.Error())
+		log.Fatal("CalendarId: " + calendarId)
 	}
-	fmt.Println("Upcoming events:")
-	if len(events.Items) == 0 {
-		fmt.Println("No upcoming events found.")
-	} else {
-		for _, item := range events.Items {
-			date := item.Start.DateTime
-			if date == "" {
-				date = item.Start.Date
-			}
-			fmt.Printf("%v (%v)\n", item.Summary, date)
+	var event_list []DataStruct.EVENT
+	for _, item := range events.Items {
+		var startT time.Time
+		startT, err := formatEventDateTimeToGolangTimeTime(item.Start.Date, item.Start.DateTime, loc)
+		if err != nil {
+			log.Fatal("StartDateTime in formatEventDateTimeToGolangTimeTime error.[" + item.Start.Date + "][" + item.Start.DateTime + "]")
+		}
+		var endT time.Time
+		endT, err = formatEventDateTimeToGolangTimeTime(item.End.Date, item.End.DateTime, loc)
+		if err != nil {
+			log.Fatal("EndDateTime in formatEventDateTimeToGolangTimeTime error.[" + item.Start.Date + "][" + item.Start.DateTime + "]")
+		}
+		event_list = append(event_list, DataStruct.EVENT{
+			Name:      item.Summary,
+			StartTime: startT,
+			EndTime:   endT,
+		})
+		log.Debug("{Event Name: \"" + item.Summary + "\", Start Time: " + item.Start.Date + ", End Time:" + item.Start.DateTime + "}")
+	}
+	return event_list
+}
+
+func formatEventDateTimeToGolangTimeTime(date string, datetime string, loc *time.Location) (time.Time, error) {
+	var ret time.Time
+	var err error
+	if date != "" {
+		ret, err = time.ParseInLocation("2006-01-02", date, loc)
+		if err != nil {
+			log.Fatal("Date ParseInLocation Error. [" + date + "]\n")
+		}
+	} else if datetime != "" {
+		ret, err = time.ParseInLocation(time.RFC3339, datetime, loc)
+		if err != nil {
+			log.Fatal("Date ParseInLocation Error. [" + datetime + "]\n")
 		}
 	}
+	return ret, err
 }
 
 // Retrieve a token, saves the token, then returns the generated client.

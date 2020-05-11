@@ -6,15 +6,22 @@ PORT = "4040"
 DEBUG = true
 
 [[MEMBERS]]
-NAME = "qi"
-GROUP = 1
-PRIVILEGE = 0
-
-[[MEMBERS]]
-NAME = "ju"
+NAME = "a"
 GROUP = 1
 PRIVILEGE = 1
+CalendarId = "aa@group.calendar.google.com"
 
+[[MEMBERS]]
+NAME = "admin"
+GROUP = 1
+PRIVILEGE = 0
+CalendarId = "bb@group.calendar.google.com"
+
+[[MEMBERS]]
+NAME = "c"
+GROUP = 1
+PRIVILEGE = 1
+CalendarId = "cc@group.calendar.google.com"
 
 [[EVENTS]]
 NAME = "休假"
@@ -35,4 +42,3 @@ TIME = []
 [[EVENTS]]
 NAME = "餐差"
 TIME = [6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18]
-
